@@ -99,16 +99,16 @@ class Database:
             totalSum += row[colIndex]
         return totalSum
 
-    def join(self, otherDb, columnSelf, columnOther):
-        colIndexSelf = self.columnToDatabaseIndexMapping[columnSelf]
-        colIndexOther = otherDb.columnToDatabaseIndexMapping[columnOther]
+    def join(self, table1, column1, table2, column2):
+        colIndex1 = table1.columnToDatabaseIndexMapping[column1]
+        colIndex2 = table2.columnToDatabaseIndexMapping[column2]
 
         joinedData = []
 
-        for rowSelf in self.database:
-            for rowOther in otherDb.database:
-                if rowSelf[colIndexSelf] == rowOther[colIndexOther]:
-                    joinedRow = rowSelf + rowOther[:colIndexOther] + rowOther[colIndexOther + 1:]
+        for row1 in table1.database:
+            for row2 in table2.database:
+                if row1[colIndex1] == row2[colIndex2]:
+                    joinedRow = row1 + row2[:colIndex2] + row2[colIndex2 + 1:]
                     joinedData.append(joinedRow)
 
         print("Joined Table:")
@@ -145,4 +145,4 @@ if __name__ == "__main__":
     sumSalaries = Employee.sum("salary")
     print("Sum of Salaries:", sumSalaries)
 
-    People.join(Employee, "id", "id")
+    People.join(People, "id", Employee, "id")
