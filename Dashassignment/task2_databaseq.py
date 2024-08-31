@@ -25,26 +25,12 @@ class Database:
 
         self.numRows += 1
         self.database.append(newRow)
-        currentIndex = self.numRows - 1
 
-        while currentIndex > 0 and self.database[currentIndex][self.columnToDatabaseIndexMapping[self.sortColumn]] < self.database[currentIndex - 1][self.columnToDatabaseIndexMapping[self.sortColumn]]:
-            self.database[currentIndex], self.database[currentIndex - 1] = self.database[currentIndex - 1], self.database[currentIndex]
-            currentIndex -= 1
-
-    def binarySearch(self, column, value):
-        low = 0
-        high = self.numRows - 1
+    def linearSearch(self, column, value):
         colIndex = self.columnToDatabaseIndexMapping[column]
-
-        while low <= high:
-            mid = (low + high) // 2
-            if self.database[mid][colIndex] == value:
-                return mid
-            elif self.database[mid][colIndex] < value:
-                low = mid + 1
-            else:
-                high = mid - 1
-
+        for i in range(self.numRows):
+            if self.database[i][colIndex] == value:
+                return i
         return -1
 
     def select(self, column, conditionType="=", value=None):
@@ -57,23 +43,19 @@ class Database:
             return result
 
         if conditionType == "=":
-            idx = self.binarySearch(column, value)
+            idx = self.linearSearch(column, value)
             if idx != -1:
                 result.append(self.database[idx])
 
         elif conditionType == ">":
-            idx = self.binarySearch(column, value)
-            if idx != -1:
-                for i in range(idx, self.numRows):
-                    if self.database[i][colIndex] > value:
-                        result.append(self.database[i])
+            for row in self.database:
+                if row[colIndex] > value:
+                    result.append(row)
 
         elif conditionType == "<":
-            idx = self.binarySearch(column, value)
-            if idx != -1:
-                for i in range(0, idx):
-                    if self.database[i][colIndex] < value:
-                        result.append(self.database[i])
+            for row in self.database:
+                if row[colIndex] < value:
+                    result.append(row)
 
         return result
 
@@ -133,6 +115,7 @@ class Database:
         for row in joinedData:
             print(row)
 
+
 if __name__ == "__main__":
     People = Database.create(columns={"id": int, "name": str, "age": int}, primary_key="id")
     Employee = Database.create(columns={"id": int, "department": str, "salary": int}, primary_key="id")
@@ -145,24 +128,21 @@ if __name__ == "__main__":
     Employee.insert({"id": 2, "department": "Marketing", "salary": 600000})
     Employee.insert({"id": 3, "department": "HR", "salary": 80000})
 
-    #Just to see all the values from the a column I've added the "all" functionality
     allnames = People.select("name", "=", "all")
     print("All names:", allnames)
 
-    selected = People.select("id", "=", 2)
+    selected = People.select("name", "=", "Ramesh")
     print("Selected Rows where id = 2:", selected)
 
     People.delete("age", ">", 30)
-    print(" after deleting rows where age > 30:", People.database)
+    print("Table after deleting rows where age > 30:", People.database)
 
     People.insert({"id": 3, "name": "Ramesh", "age": 35})
 
-    max = Employee.max("salary")
-    print("Max Salary:", max)
+    maxSalary = Employee.max("salary")
+    print("Max Salary:", maxSalary)
 
-    sum = Employee.sum("salary")
-    print("Sum of Salaries:", sum)
+    sumSalaries = Employee.sum("salary")
+    print("Sum of Salaries:", sumSalaries)
 
     People.join(Employee, "id", "id")
-
-
